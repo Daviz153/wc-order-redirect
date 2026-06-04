@@ -69,9 +69,11 @@ jobs:
           wp plugin install woocommerce --activate --path=/tmp/wordpress
           wp eval 'update_option("woocommerce_currency", "KRW");
             update_option("woocommerce_default_country", "KR");
-            update_option("woocommerce_cod_settings", ["enabled"=>"yes","title"=>"Cash on Delivery"]);
             update_option("woocommerce_onboarding_profile", ["completed"=>true]);' \
             --path=/tmp/wordpress
+          # COD를 WC CLI로 활성화 (option 직접 업데이트보다 안정적)
+          wp wc payment_gateway update cod \
+            --enabled=true --user=1 --path=/tmp/wordpress
 
       - name: Install plugin
         run: |
