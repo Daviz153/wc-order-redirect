@@ -71,9 +71,17 @@ jobs:
             update_option("woocommerce_default_country", "KR");
             update_option("woocommerce_onboarding_profile", ["completed"=>true]);' \
             --path=/tmp/wordpress
-          # COD를 WC CLI로 활성화 (option 직접 업데이트보다 안정적)
-          wp wc payment_gateway update cod \
-            --enabled=true --user=1 --path=/tmp/wordpress
+          # COD 활성화 — virtual 상품 허용, 모든 배송 방법에서 노출
+          wp eval '
+            update_option("woocommerce_cod_settings", [
+              "enabled"            => "yes",
+              "title"              => "Cash on Delivery",
+              "description"        => "",
+              "instructions"       => "",
+              "enable_for_methods" => [],
+              "enable_for_virtual" => "yes",
+            ]);
+          ' --path=/tmp/wordpress
           # WC 10.x는 블록 체크아웃이 기본값 — 클래식 shortcode로 교체
           CHECKOUT_ID=$(wp option get woocommerce_checkout_page_id --path=/tmp/wordpress)
           wp post update $CHECKOUT_ID \

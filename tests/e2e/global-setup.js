@@ -33,6 +33,7 @@ module.exports = async function globalSetup() {
     update_post_meta($id, '_price', '100000');
     update_post_meta($id, '_regular_price', '100000');
     update_post_meta($id, '_stock_status', 'instock');
+    update_post_meta($id, '_virtual', 'yes');
     update_post_meta($id, '_wc_order_redirect_url', '${REDIRECT_TARGET}');
     echo $id;
   `);
@@ -48,6 +49,7 @@ module.exports = async function globalSetup() {
     update_post_meta($id, '_price', '30000');
     update_post_meta($id, '_regular_price', '30000');
     update_post_meta($id, '_stock_status', 'instock');
+    update_post_meta($id, '_virtual', 'yes');
     echo $id;
   `);
 
