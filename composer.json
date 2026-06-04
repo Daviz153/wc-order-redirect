@@ -6,5 +6,8 @@
         "psr-4": {
             "Tests\\": "tests/"
         }
+    },
+    "require": {
+        "yahnis-elsts/plugin-update-checker": "^5.7"
     }
 }
