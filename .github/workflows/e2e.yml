@@ -87,6 +87,25 @@ jobs:
           wp post update $CHECKOUT_ID \
             --post_content="[woocommerce_checkout]" --path=/tmp/wordpress
 
+      - name: Pre-fill admin billing address
+        run: |
+          wp eval '
+            $meta = [
+              "billing_first_name" => "Test",
+              "billing_last_name"  => "User",
+              "billing_country"    => "KR",
+              "billing_address_1"  => "123 Teheran-ro",
+              "billing_city"       => "Seoul",
+              "billing_postcode"   => "06234",
+              "billing_phone"      => "01012345678",
+              "billing_email"      => "admin@example.com",
+            ];
+            foreach ($meta as $key => $value) {
+              update_user_meta(1, $key, $value);
+            }
+            echo "billing pre-filled";
+          ' --path=/tmp/wordpress
+
       - name: Install plugin
         run: |
           mkdir -p /tmp/wordpress/wp-content/plugins/wc-order-redirect/includes
