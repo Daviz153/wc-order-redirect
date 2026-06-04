@@ -34,8 +34,7 @@ test('COD 결제 완료 후 리다이렉트 URL로 즉시 이동', async ({ page
   await page.waitForLoadState('networkidle');
   await expect(page).toHaveURL(/checkout/);
 
-  // 3. WooCommerce blockUI 오버레이 제거 후 제출
-  await page.waitForFunction(() => !document.querySelector('.blockUI'), { timeout: 30_000 });
+  // 3. 주문 제출
   await page.click('#place_order');
 
   // 4. order-received를 거치지 않고 설정한 URL로 즉시 이동
@@ -53,8 +52,7 @@ test('URL 없는 상품은 COD 결제 후 기존 감사 페이지 유지', async
   await page.waitForLoadState('networkidle');
   await expect(page).toHaveURL(/checkout/);
 
-  // 3. WooCommerce blockUI 오버레이 제거 후 제출
-  await page.waitForFunction(() => !document.querySelector('.blockUI'), { timeout: 30_000 });
+  // 3. 주문 제출
   await page.click('#place_order');
 
   // order-received 페이지에 머물러야 함

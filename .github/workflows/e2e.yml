@@ -69,7 +69,8 @@ jobs:
           wp plugin install woocommerce --activate --path=/tmp/wordpress
           wp eval 'update_option("woocommerce_currency", "KRW");
             update_option("woocommerce_default_country", "KR");
-            update_option("woocommerce_onboarding_profile", ["completed"=>true]);' \
+            update_option("woocommerce_onboarding_profile", ["completed"=>true]);
+            update_option("woocommerce_coming_soon", "no");' \
             --path=/tmp/wordpress
           # COD 활성화 — virtual 상품 허용, 모든 배송 방법에서 노출
           wp eval '
