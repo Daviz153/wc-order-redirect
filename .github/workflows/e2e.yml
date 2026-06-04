@@ -74,6 +74,10 @@ jobs:
           # COD를 WC CLI로 활성화 (option 직접 업데이트보다 안정적)
           wp wc payment_gateway update cod \
             --enabled=true --user=1 --path=/tmp/wordpress
+          # WC 10.x는 블록 체크아웃이 기본값 — 클래식 shortcode로 교체
+          CHECKOUT_ID=$(wp option get woocommerce_checkout_page_id --path=/tmp/wordpress)
+          wp post update $CHECKOUT_ID \
+            --post_content="[woocommerce_checkout]" --path=/tmp/wordpress
 
       - name: Install plugin
         run: |

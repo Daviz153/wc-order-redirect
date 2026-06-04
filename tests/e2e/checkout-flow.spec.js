@@ -14,6 +14,8 @@ test.beforeAll(() => {
   );
 });
 
+test.setTimeout(60_000);
+
 test.beforeEach(async ({ page }) => {
   // 각 테스트 전 장바구니 비우기
   await page.goto('cart/?empty-cart=1', { waitUntil: 'domcontentloaded' });
@@ -27,6 +29,7 @@ test('COD 결제 완료 후 리다이렉트 URL로 즉시 이동', async ({ page
 
   // 2. 체크아웃 이동
   await page.goto('checkout/');
+  await page.waitForLoadState('networkidle');
   await expect(page).toHaveURL(/checkout/);
 
   // 3. 청구 정보 입력
@@ -57,6 +60,7 @@ test('URL 없는 상품은 COD 결제 후 기존 감사 페이지 유지', async
 
   // 2. 체크아웃
   await page.goto('checkout/');
+  await page.waitForLoadState('networkidle');
   await expect(page).toHaveURL(/checkout/);
 
   await page.fill('#billing_first_name', '테스트');
