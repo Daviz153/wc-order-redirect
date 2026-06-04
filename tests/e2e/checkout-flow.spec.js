@@ -41,11 +41,8 @@ test('COD 결제 완료 후 리다이렉트 URL로 즉시 이동', async ({ page
   await page.fill('#billing_phone', '01012345678');
   await page.fill('#billing_email', 'e2e-test@example.com');
 
-  // 4. COD 선택
-  await expect(page.locator('#payment_method_cod')).toBeVisible();
-  await page.click('#payment_method_cod');
-
-  // 5. 주문 제출
+  // 4. COD가 유일한 결제 수단 → 자동 선택됨 (라디오 hidden 처리)
+  // 주문 제출
   await page.click('#place_order');
 
   // 6. order-received를 거치지 않고 설정한 URL로 즉시 이동
@@ -71,8 +68,6 @@ test('URL 없는 상품은 COD 결제 후 기존 감사 페이지 유지', async
   await page.fill('#billing_phone', '01012345678');
   await page.fill('#billing_email', 'e2e-test@example.com');
 
-  await expect(page.locator('#payment_method_cod')).toBeVisible();
-  await page.click('#payment_method_cod');
   await page.click('#place_order');
 
   // order-received 페이지에 머물러야 함
