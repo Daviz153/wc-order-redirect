@@ -14,7 +14,7 @@ class WC_Order_Redirect_Meta {
     public function add_meta_box(): void {
         add_meta_box(
             'wc_order_redirect',
-            '결제 후 리다이렉트 URL',
+            '결제 후 리다이렉트',
             [$this, 'render_meta_box'],
             'product',
             'side'
@@ -23,17 +23,28 @@ class WC_Order_Redirect_Meta {
 
     public function render_meta_box(\WP_Post $post): void {
         wp_nonce_field('wc_order_redirect_save', 'wc_order_redirect_nonce');
-        $url = get_post_meta($post->ID, '_wc_order_redirect_url', true);
+        $enabled = get_post_meta($post->ID, '_wc_order_redirect_enabled', true);
+        $url     = get_post_meta($post->ID, '_wc_order_redirect_url', true);
         ?>
-        <label for="wc_order_redirect_url">결제 완료 시 이동할 URL</label>
+        <label style="display:flex; align-items:center; gap:6px; margin-bottom:10px; font-weight:600;">
+            <input type="checkbox"
+                   id="wc_order_redirect_enabled"
+                   name="wc_order_redirect_enabled"
+                   value="yes"
+                   <?php checked($enabled, 'yes'); ?>>
+            리다이렉트 사용
+        </label>
+        <label for="wc_order_redirect_url" style="display:block; margin-bottom:4px;">
+            결제 완료 시 이동할 URL
+        </label>
         <input type="url"
                id="wc_order_redirect_url"
                name="wc_order_redirect_url"
                value="<?php echo esc_attr($url); ?>"
                placeholder="https://example.com"
-               style="width:100%; margin-top:4px;">
+               style="width:100%;">
         <p style="margin-top:4px; color:#666; font-size:12px;">
-            비워두면 기본 감사 페이지가 표시됩니다.
+            활성화 시 결제 완료 후 즉시 이동합니다.
         </p>
         <?php
     }
@@ -52,7 +63,10 @@ class WC_Order_Redirect_Meta {
             return;
         }
 
-        $url = esc_url_raw(wp_unslash($_POST['wc_order_redirect_url'] ?? ''));
+        $enabled = isset($_POST['wc_order_redirect_enabled']) ? 'yes' : 'no';
+        $url     = esc_url_raw(wp_unslash($_POST['wc_order_redirect_url'] ?? ''));
+
+        update_post_meta($post_id, '_wc_order_redirect_enabled', $enabled);
         update_post_meta($post_id, '_wc_order_redirect_url', $url);
     }
 }
