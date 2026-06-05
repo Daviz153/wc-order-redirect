@@ -42,9 +42,19 @@ class WC_Order_Redirect {
     public function get_redirect_url(\WC_Order $order): string {
         $items = $order->get_items();
 
-        usort($items, fn($a, $b) => $b->get_total() <=> $a->get_total());
+        // 리다이렉트 활성화된 상품만 추출
+        $enabled_items = array_filter($items, function ($item) {
+            return 'yes' === get_post_meta($item->get_product_id(), '_wc_order_redirect_enabled', true);
+        });
 
-        foreach ($items as $item) {
+        if (empty($enabled_items)) {
+            return '';
+        }
+
+        // 활성화된 상품 중 최고가 우선
+        usort($enabled_items, fn($a, $b) => $b->get_total() <=> $a->get_total());
+
+        foreach ($enabled_items as $item) {
             $url = get_post_meta($item->get_product_id(), '_wc_order_redirect_url', true);
             if ($url && wp_http_validate_url($url)) {
                 return $url;

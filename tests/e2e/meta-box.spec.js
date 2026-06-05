@@ -7,6 +7,7 @@ test('product edit page renders redirect meta box', async ({ page }) => {
 
   const metaBox = page.locator('#wc_order_redirect');
   await expect(metaBox).toBeVisible();
-  await expect(metaBox.locator('h2')).toContainText('결제 후 리다이렉트 URL');
+  await expect(metaBox.locator('h2')).toContainText('결제 후 리다이렉트');
+  await expect(page.locator('#wc_order_redirect_enabled')).toBeVisible();
   await expect(page.locator('#wc_order_redirect_url')).toBeVisible();
 });
