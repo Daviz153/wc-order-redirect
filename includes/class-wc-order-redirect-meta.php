@@ -26,14 +26,35 @@ class WC_Order_Redirect_Meta {
         $enabled = get_post_meta($post->ID, '_wc_order_redirect_enabled', true);
         $url     = get_post_meta($post->ID, '_wc_order_redirect_url', true);
         ?>
-        <label style="display:flex; align-items:center; gap:6px; margin-bottom:10px; font-weight:600;">
-            <input type="checkbox"
-                   id="wc_order_redirect_enabled"
-                   name="wc_order_redirect_enabled"
-                   value="yes"
-                   <?php checked($enabled, 'yes'); ?>>
-            리다이렉트 사용
-        </label>
+        <style>
+        .wcor-toggle-wrap { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+        .wcor-toggle { position:relative; display:inline-block; width:44px; height:24px; flex-shrink:0; }
+        .wcor-toggle input { opacity:0; width:0; height:0; }
+        .wcor-slider {
+            position:absolute; inset:0; cursor:pointer;
+            background:#ccc; border-radius:24px;
+            transition:background .2s;
+        }
+        .wcor-slider::before {
+            content:""; position:absolute;
+            width:18px; height:18px; left:3px; top:3px;
+            background:#fff; border-radius:50%;
+            transition:transform .2s;
+        }
+        .wcor-toggle input:checked + .wcor-slider { background:#2271b1; }
+        .wcor-toggle input:checked + .wcor-slider::before { transform:translateX(20px); }
+        </style>
+        <div class="wcor-toggle-wrap">
+            <label class="wcor-toggle">
+                <input type="checkbox"
+                       id="wc_order_redirect_enabled"
+                       name="wc_order_redirect_enabled"
+                       value="yes"
+                       <?php checked($enabled, 'yes'); ?>>
+                <span class="wcor-slider"></span>
+            </label>
+            <span style="font-weight:600;">리다이렉트 사용</span>
+        </div>
         <label for="wc_order_redirect_url" style="display:block; margin-bottom:4px;">
             결제 완료 시 이동할 URL
         </label>

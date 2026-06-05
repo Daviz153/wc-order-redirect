@@ -36,7 +36,16 @@ class WC_Order_Redirect {
         }
 
         $order = wc_get_order($order_id);
-        return ($order instanceof \WC_Order) ? $order : null;
+        if (!($order instanceof \WC_Order)) {
+            return null;
+        }
+
+        $key = isset($_GET['key']) ? sanitize_text_field(wp_unslash($_GET['key'])) : '';
+        if (!$order->key_is_valid($key)) {
+            return null;
+        }
+
+        return $order;
     }
 
     public function get_redirect_url(\WC_Order $order): string {

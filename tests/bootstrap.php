@@ -56,6 +56,7 @@ function wp_nonce_field(string $action, string $name): void {}
 function check_admin_referer(string $action, string $name = '_wpnonce'): bool { return true; }
 function current_user_can(string $cap, ...$args): bool { return true; }
 function wp_unslash($value) { return $value; }
+function sanitize_text_field(string $str): string { return trim(strip_tags($str)); }
 function absint($value): int { return abs((int) $value); }
 
 // --- WooCommerce 스텁 ---
@@ -80,6 +81,10 @@ class WC_Order {
 
     public function get_items(): array {
         return $this->items;
+    }
+
+    public function key_is_valid(string $key): bool {
+        return true;
     }
 }
 
