@@ -61,7 +61,7 @@ class WC_Order_Redirect {
         }
 
         // 활성화된 상품 중 최고가 우선
-        usort($enabled_items, fn($a, $b) => $b->get_total() <=> $a->get_total());
+        uasort($enabled_items, fn($a, $b) => $b->get_total() <=> $a->get_total());
 
         foreach ($enabled_items as $item) {
             $url = get_post_meta($item->get_product_id(), '_wc_order_redirect_url', true);
