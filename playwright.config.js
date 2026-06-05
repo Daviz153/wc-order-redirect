@@ -22,6 +22,14 @@ module.exports = defineConfig({
         storageState: 'tests/e2e/.auth/admin.json',
       },
     },
+    {
+      // 비로그인 게스트 — storageState 없음 (실제 고객 환경)
+      name: 'guest',
+      use: {
+        ...devices['Desktop Chrome'],
+      },
+      testMatch: '**/guest-checkout.spec.js',
+    },
   ],
   reporter: [['list'], ['html', { open: 'never' }]],
 });
