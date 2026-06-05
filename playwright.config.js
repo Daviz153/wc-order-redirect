@@ -21,6 +21,7 @@ module.exports = defineConfig({
         ...devices['Desktop Chrome'],
         storageState: 'tests/e2e/.auth/admin.json',
       },
+      testIgnore: '**/guest-checkout.spec.js',
     },
     {
       // 비로그인 게스트 — storageState 없음 (실제 고객 환경)
