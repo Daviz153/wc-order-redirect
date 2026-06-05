@@ -9,6 +9,23 @@ class WC_Order_Redirect_Meta {
     public function __construct() {
         add_action('add_meta_boxes', [$this, 'add_meta_box']);
         add_action('save_post_product', [$this, 'save_meta_box']);
+        add_action('admin_enqueue_scripts', [$this, 'enqueue_styles']);
+    }
+
+    public function enqueue_styles(string $hook): void {
+        if (!in_array($hook, ['post.php', 'post-new.php'], true)) {
+            return;
+        }
+        $screen = get_current_screen();
+        if (!$screen || $screen->post_type !== 'product') {
+            return;
+        }
+        wp_enqueue_style(
+            'wcor-meta-box',
+            plugin_dir_url(dirname(__FILE__)) . 'assets/css/meta-box.css',
+            [],
+            '1.0.0'
+        );
     }
 
     public function add_meta_box(): void {
@@ -26,24 +43,6 @@ class WC_Order_Redirect_Meta {
         $enabled = get_post_meta($post->ID, '_wc_order_redirect_enabled', true);
         $url     = get_post_meta($post->ID, '_wc_order_redirect_url', true);
         ?>
-        <style>
-        .wcor-toggle-wrap { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
-        .wcor-toggle { position:relative; display:inline-block; width:44px; height:24px; flex-shrink:0; }
-        .wcor-toggle input { opacity:0; width:0; height:0; }
-        .wcor-slider {
-            position:absolute; inset:0; cursor:pointer;
-            background:#ccc; border-radius:24px;
-            transition:background .2s;
-        }
-        .wcor-slider::before {
-            content:""; position:absolute;
-            width:18px; height:18px; left:3px; top:3px;
-            background:#fff; border-radius:50%;
-            transition:transform .2s;
-        }
-        .wcor-toggle input:checked + .wcor-slider { background:#2271b1; }
-        .wcor-toggle input:checked + .wcor-slider::before { transform:translateX(20px); }
-        </style>
         <div class="wcor-toggle-wrap">
             <label class="wcor-toggle">
                 <input type="checkbox"

@@ -7,6 +7,9 @@ define('DOING_AUTOSAVE', false);
 function add_action(string $hook, callable $callback, int $priority = 10, int $args = 1): void {}
 function add_filter(string $hook, callable $callback, int $priority = 10, int $args = 1): void {}
 function add_meta_box(string $id, string $title, callable $callback, string $screen, string $context = 'advanced'): void {}
+function get_current_screen(): ?object { return null; }
+function plugin_dir_url(string $file): string { return 'http://example.com/plugins/wc-order-redirect/'; }
+function wp_enqueue_style(string $handle, string $src = '', array $deps = [], $ver = false): void {}
 
 // --- post_meta 인메모리 저장소 ---
 $GLOBALS['_post_meta'] = [];
