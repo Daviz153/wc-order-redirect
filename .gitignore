@@ -4,3 +4,5 @@ tests/e2e/.auth/
 playwright-report/
 test-results/
 PROJECT_ARCHIVE.md
+CLAUDE.md
+*.zip
