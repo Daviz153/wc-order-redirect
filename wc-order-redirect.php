@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WC Order Redirect
  * Description: 결제 완료 후 상품별로 설정한 URL로 즉시 이동합니다.
- * Version:     1.0.0
+ * Version:     1.0.2
  * Requires Plugins: woocommerce
  * Requires at least: 6.0
  * Requires PHP: 8.0
