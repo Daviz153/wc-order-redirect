@@ -7,7 +7,7 @@ module.exports = defineConfig({
   retries: process.env.CI ? 1 : 0,
   use: {
     // trailing slash 필수 — spec 파일에서 leading slash 없이 경로 작성
-    baseURL: process.env.WP_BASE_URL || 'http://localhost:8080/wordpress/',
+    baseURL: process.env.WP_BASE_URL || 'http://localhost:8080/',
   },
   projects: [
     {

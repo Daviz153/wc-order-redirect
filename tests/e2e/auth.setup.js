@@ -12,7 +12,7 @@ setup('WP 관리자 로그인 저장', async ({ page }) => {
     if (state.cookies && state.cookies.length > 0) return;
   }
 
-  const base = process.env.WP_BASE_URL || 'http://localhost:8080/wordpress/';
+  const base = process.env.WP_BASE_URL || 'http://localhost:8080/';
 
   await page.goto(base + 'wp-login.php', { waitUntil: 'domcontentloaded', timeout: 60_000 });
   await page.fill('#user_login', process.env.WP_ADMIN_USER || 'admin');

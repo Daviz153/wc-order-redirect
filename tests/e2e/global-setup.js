@@ -3,8 +3,6 @@ const fs = require('fs');
 const path = require('path');
 
 const WP_PATH = process.env.WP_PATH || '/tmp/wordpress';
-// CI에서 리다이렉트 타깃은 WP 홈페이지 (로컬 URL — 외부 네트워크 불필요)
-const REDIRECT_TARGET = process.env.WP_BASE_URL || 'http://localhost:8080/wordpress/';
 
 function wpEval(phpCode) {
   const tmpFile = `/tmp/wc-e2e-setup-${Date.now()}.php`;
@@ -21,6 +19,13 @@ function wpEval(phpCode) {
 module.exports = async function globalSetup() {
   const authDir = path.join(__dirname, '.auth');
   fs.mkdirSync(authDir, { recursive: true });
+
+  // 실제 WordPress home URL (web서버 prefix /wordpress/ 와 별개 — 프론트엔드 URL 기준)
+  const frontendBaseUrl = wpEval(`<?php echo trailingslashit(home_url()); ?>`);
+  // site_url() — wp-admin 경로 계산 기준 (siteurl = http://localhost:8080)
+  const siteUrl = wpEval(`<?php echo untrailingslashit(site_url()); ?>`);
+  // 리다이렉트 타깃 = WP 홈 (항상 유효한 200 응답)
+  const REDIRECT_TARGET = frontendBaseUrl;
 
   // 리다이렉트 URL이 있는 상품 (고가)
   const productWithUrl = wpEval(`<?php
@@ -56,8 +61,14 @@ module.exports = async function globalSetup() {
 
   fs.writeFileSync(
     path.join(authDir, 'test-data.json'),
-    JSON.stringify({ productWithUrl, productWithoutUrl, redirectTarget: REDIRECT_TARGET })
+    JSON.stringify({
+      productWithUrl,
+      productWithoutUrl,
+      redirectTarget: REDIRECT_TARGET,
+      frontendBaseUrl,
+      siteUrl,
+    })
   );
 
-  console.log(`[global-setup] productWithUrl=${productWithUrl}, productWithoutUrl=${productWithoutUrl}`);
+  console.log(`[global-setup] productWithUrl=${productWithUrl}, productWithoutUrl=${productWithoutUrl}, frontendBaseUrl=${frontendBaseUrl}`);
 };
