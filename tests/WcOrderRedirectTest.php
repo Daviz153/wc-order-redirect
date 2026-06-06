@@ -129,32 +129,29 @@ class WcOrderRedirectTest extends TestCase {
     // --- [Feature A] 메타박스 저장 ---
 
     public function test_enabled_flag_saved(): void {
-        $_POST['wc_order_redirect_nonce']   = 'test';
         $_POST['wc_order_redirect_enabled'] = 'yes';
         $_POST['wc_order_redirect_url']     = 'https://example.com/next';
 
-        (new WC_Order_Redirect_Meta())->save_meta_box(42);
+        (new WC_Order_Redirect_Meta())->save_product_meta(42);
 
         $this->assertSame('yes', get_post_meta(42, '_wc_order_redirect_enabled', true));
     }
 
     public function test_disabled_when_checkbox_unchecked(): void {
-        $_POST['wc_order_redirect_nonce'] = 'test';
         // wc_order_redirect_enabled 키 없음 = 체크 안 함
         unset($_POST['wc_order_redirect_enabled']);
         $_POST['wc_order_redirect_url'] = 'https://example.com/next';
 
-        (new WC_Order_Redirect_Meta())->save_meta_box(42);
+        (new WC_Order_Redirect_Meta())->save_product_meta(42);
 
         $this->assertSame('no', get_post_meta(42, '_wc_order_redirect_enabled', true));
     }
 
     public function test_invalid_url_sanitized_on_save(): void {
-        $_POST['wc_order_redirect_nonce']   = 'test';
         $_POST['wc_order_redirect_enabled'] = 'yes';
         $_POST['wc_order_redirect_url']     = 'javascript:alert(1)';
 
-        (new WC_Order_Redirect_Meta())->save_meta_box(42);
+        (new WC_Order_Redirect_Meta())->save_product_meta(42);
 
         $this->assertSame('', get_post_meta(42, '_wc_order_redirect_url', true));
     }
