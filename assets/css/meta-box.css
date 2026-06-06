@@ -1,4 +1,6 @@
 .wcor-toggle-wrap { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+/* WooCommerce 패널 내부의 label { display:block } 오버라이드 */
+#wcor_product_data .wcor-toggle,
 .wcor-toggle { position:relative; display:inline-block; width:44px; height:24px; flex-shrink:0; }
 .wcor-toggle input { opacity:0; width:0; height:0; }
 .wcor-slider {
