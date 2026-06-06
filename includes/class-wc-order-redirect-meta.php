@@ -25,7 +25,14 @@ class WC_Order_Redirect_Meta {
             'wcor-meta-box',
             plugin_dir_url(dirname(__FILE__)) . 'assets/css/meta-box.css',
             [],
-            '1.0.0'
+            '1.0.1'
+        );
+        wp_enqueue_script(
+            'wcor-meta-box',
+            plugin_dir_url(dirname(__FILE__)) . 'assets/js/meta-box.js',
+            [],
+            '1.0.1',
+            true
         );
     }
 
@@ -39,35 +46,36 @@ class WC_Order_Redirect_Meta {
     }
 
     public function render_product_panel(): void {
-        $product_id = get_the_ID();
-        $enabled    = get_post_meta($product_id, '_wc_order_redirect_enabled', true);
-        $url        = get_post_meta($product_id, '_wc_order_redirect_url', true);
+        $product_id  = get_the_ID();
+        $enabled     = get_post_meta($product_id, '_wc_order_redirect_enabled', true) === 'yes';
+        $url         = esc_attr(get_post_meta($product_id, '_wc_order_redirect_url', true));
+        $track_color = $enabled ? '#2271b1' : '#ccc';
+        $thumb_left  = $enabled ? '22px' : '2px';
+        $url_hidden  = $enabled ? '' : 'display:none;';
         ?>
         <div id="wcor_product_data" class="panel woocommerce_options_panel">
             <div class="options_group" style="padding:12px 16px">
-                <div class="wcor-toggle-wrap">
-                    <label class="wcor-toggle">
-                        <input type="checkbox"
-                               id="wc_order_redirect_enabled"
-                               name="wc_order_redirect_enabled"
-                               value="yes"
-                               <?php checked($enabled, 'yes'); ?>>
-                        <span class="wcor-slider"></span>
-                    </label>
-                    <span style="font-weight:600;">리다이렉트 사용</span>
-                </div>
-                <p style="margin-top:10px; margin-bottom:4px;">
-                    <label for="wc_order_redirect_url">결제 완료 시 이동할 URL</label>
+
+                <p style="margin:0 0 12px; padding:0">
+                    <span id="wcor-toggle-wrap" style="display:inline-flex; align-items:center; gap:10px; cursor:pointer">
+                        <input type="checkbox" id="wc_order_redirect_enabled"
+                               name="wc_order_redirect_enabled" value="yes"
+                               style="display:none" <?php checked(true, $enabled); ?>>
+                        <span id="wcor-track" style="position:relative; display:inline-block; width:44px; height:24px; border-radius:12px; flex-shrink:0; transition:background .2s; background:<?php echo esc_attr($track_color); ?>">
+                            <span id="wcor-thumb" style="position:absolute; width:20px; height:20px; background:#fff; border-radius:50%; top:2px; left:<?php echo esc_attr($thumb_left); ?>; transition:left .2s; box-shadow:0 1px 3px rgba(0,0,0,.3)"></span>
+                        </span>
+                        <span style="font-size:13px; color:#1d2327; font-weight:600">리다이렉트 사용</span>
+                    </span>
                 </p>
-                <input type="url"
-                       id="wc_order_redirect_url"
-                       name="wc_order_redirect_url"
-                       value="<?php echo esc_attr($url); ?>"
-                       placeholder="https://example.com"
-                       style="width:100%; max-width:420px;">
-                <p style="margin-top:4px; color:#666; font-size:12px;">
-                    활성화 시 결제 완료 후 즉시 이동합니다.
+
+                <p id="wcor-url-field" style="margin:0 0 8px; padding:0; <?php echo esc_attr($url_hidden); ?>">
+                    <span style="display:block; font-size:12px; font-weight:600; color:#50575e; margin-bottom:4px">결제 완료 시 이동할 URL</span>
+                    <input type="url" id="wc_order_redirect_url" name="wc_order_redirect_url"
+                           value="<?php echo $url; ?>" style="width:100%; max-width:420px"
+                           placeholder="https://example.com">
+                    <span style="display:block; font-size:12px; color:#757575; margin-top:3px">활성화 시 결제 완료 후 즉시 이동합니다.</span>
                 </p>
+
             </div>
         </div>
         <?php

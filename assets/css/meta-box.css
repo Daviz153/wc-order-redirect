@@ -1,18 +1,1 @@
-.wcor-toggle-wrap { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
-/* WooCommerce 패널 내부의 label { display:block } 오버라이드 */
-#wcor_product_data .wcor-toggle,
-.wcor-toggle { position:relative; display:inline-block; width:44px; height:24px; flex-shrink:0; }
-.wcor-toggle input { opacity:0; width:0; height:0; }
-.wcor-slider {
-    position:absolute; inset:0; cursor:pointer;
-    background:#ccc; border-radius:24px;
-    transition:background .2s;
-}
-.wcor-slider::before {
-    content:""; position:absolute;
-    width:18px; height:18px; left:3px; top:3px;
-    background:#fff; border-radius:50%;
-    transition:transform .2s;
-}
-.wcor-toggle input:checked + .wcor-slider { background:#2271b1; }
-.wcor-toggle input:checked + .wcor-slider::before { transform:translateX(20px); }
+/* 리다이렉트 탭 — 토글은 인라인 스타일로 처리 (WC 패널 CSS 충돌 방지) */
