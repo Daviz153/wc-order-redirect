@@ -11,6 +11,11 @@ test('product edit page renders redirect tab panel', async ({ page }) => {
 
   const panel = page.locator('#wcor_product_data');
   await expect(panel).toBeVisible();
-  await expect(page.locator('#wc_order_redirect_enabled')).toBeVisible();
-  await expect(page.locator('#wc_order_redirect_url')).toBeVisible();
+
+  // 토글 컨트롤이 보임 (체크박스 자체는 display:none 처리)
+  await expect(page.locator('#wcor-toggle-wrap')).toBeVisible();
+
+  // 체크박스·URL 입력은 DOM에 존재함 (toggle OFF 시 URL 필드는 숨겨짐)
+  await expect(page.locator('#wc_order_redirect_enabled')).toBeAttached();
+  await expect(page.locator('#wc_order_redirect_url')).toBeAttached();
 });
