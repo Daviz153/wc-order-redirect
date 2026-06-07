@@ -30,16 +30,18 @@ test('게스트 결제 완료 후 리다이렉트 URL로 즉시 이동', async (
   await page.waitForLoadState('networkidle');
   await expect(page).toHaveURL(/checkout/);
 
-  // 3. 청구 정보 입력 (게스트는 저장된 주소 없음)
-  await page.fill('#billing_first_name', '홍');
-  await page.fill('#billing_last_name', '길동');
-  await page.fill('#billing_address_1', '강남구 테헤란로 123');
-  await page.fill('#billing_city', '서울');
-  await page.fill('#billing_postcode', '06234');
+  // 3. 청구 정보 입력 (이 쇼핑몰은 이름·전화·이메일만 필수)
+  await page.fill('#billing_first_name', '홍길동');
   await page.fill('#billing_phone', '01012345678');
   await page.fill('#billing_email', 'guest@example.com');
 
-  // 4. 주문 제출
+  // 4. COD 선택 후 주문 제출
+  await page.click('label[for="payment_method_cod"]');
+  await page.waitForLoadState('networkidle');
+  const terms = page.locator('#terms');
+  if (await terms.isVisible() && !(await terms.isChecked())) {
+    await terms.check({ force: true });
+  }
   await page.click('#place_order');
 
   // 5. 감사 페이지 없이 설정한 URL로 즉시 이동
@@ -55,14 +57,16 @@ test('게스트 결제 — URL 없는 상품은 기존 감사 페이지 유지',
   await page.waitForLoadState('networkidle');
   await expect(page).toHaveURL(/checkout/);
 
-  await page.fill('#billing_first_name', '홍');
-  await page.fill('#billing_last_name', '길동');
-  await page.fill('#billing_address_1', '강남구 테헤란로 123');
-  await page.fill('#billing_city', '서울');
-  await page.fill('#billing_postcode', '06234');
+  await page.fill('#billing_first_name', '홍길동');
   await page.fill('#billing_phone', '01012345678');
   await page.fill('#billing_email', 'guest@example.com');
 
+  await page.click('label[for="payment_method_cod"]');
+  await page.waitForLoadState('networkidle');
+  const terms2 = page.locator('#terms');
+  if (await terms2.isVisible() && !(await terms2.isChecked())) {
+    await terms2.check({ force: true });
+  }
   await page.click('#place_order');
 
   await expect(page).toHaveURL(/order-received/, { timeout: 15_000 });
