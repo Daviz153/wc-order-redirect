@@ -9,6 +9,7 @@ class WcOrderRedirectTest extends TestCase {
 
     protected function setUp(): void {
         $GLOBALS['_post_meta']              = [];
+        $GLOBALS['_options']               = [];
         $GLOBALS['_wp_redirect_called']     = false;
         $GLOBALS['_wp_redirect_url']        = '';
         $GLOBALS['_is_order_received_page'] = false;
@@ -112,6 +113,48 @@ class WcOrderRedirectTest extends TestCase {
         $url = (new WC_Order_Redirect())->get_redirect_url($order);
 
         $this->assertSame('', $url);
+    }
+
+    public function test_no_redirect_when_globally_disabled(): void {
+        $GLOBALS['_is_order_received_page']      = true;
+        $GLOBALS['_query_vars']['order-received'] = 1;
+        $GLOBALS['_options']['wcor_enabled']      = 'no';
+
+        $item  = new WC_Order_Item_Product(10, 50.0);
+        $order = new WC_Order([$item], 1);
+        $GLOBALS['_wc_orders'][1] = $order;
+
+        $GLOBALS['_post_meta'][10]['_wc_order_redirect_enabled'] = 'yes';
+        $GLOBALS['_post_meta'][10]['_wc_order_redirect_url']     = 'https://example.com/next';
+
+        (new WC_Order_Redirect())->maybe_redirect();
+
+        $this->assertFalse($GLOBALS['_wp_redirect_called']);
+    }
+
+    public function test_uses_default_url_when_no_product_enabled(): void {
+        $item  = new WC_Order_Item_Product(10, 50.0);
+        $order = new WC_Order([$item]);
+
+        $GLOBALS['_post_meta'][10]['_wc_order_redirect_enabled'] = 'no';
+        $GLOBALS['_options']['wcor_default_url']                 = 'https://default.example.com/';
+
+        $url = (new WC_Order_Redirect())->get_redirect_url($order);
+
+        $this->assertSame('https://default.example.com/', $url);
+    }
+
+    public function test_product_url_takes_priority_over_default(): void {
+        $item  = new WC_Order_Item_Product(10, 50.0);
+        $order = new WC_Order([$item]);
+
+        $GLOBALS['_post_meta'][10]['_wc_order_redirect_enabled'] = 'yes';
+        $GLOBALS['_post_meta'][10]['_wc_order_redirect_url']     = 'https://product.example.com/';
+        $GLOBALS['_options']['wcor_default_url']                 = 'https://default.example.com/';
+
+        $url = (new WC_Order_Redirect())->get_redirect_url($order);
+
+        $this->assertSame('https://product.example.com/', $url);
     }
 
     public function test_skips_invalid_url(): void {

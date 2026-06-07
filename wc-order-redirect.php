@@ -51,4 +51,10 @@ add_action('plugins_loaded', function () {
 
     new WC_Order_Redirect_Meta();
     new WC_Order_Redirect();
+
+    add_filter('woocommerce_get_settings_pages', function (array $pages): array {
+        require_once __DIR__ . '/includes/class-wc-order-redirect-settings.php';
+        $pages[] = new WC_Order_Redirect_Settings();
+        return $pages;
+    });
 });

@@ -20,6 +20,7 @@
     }
 
     wrap.addEventListener( 'click', function () {
+        if ( wrap.dataset.wcorGloballyDisabled === '1' ) return;
         toggle.checked = ! toggle.checked;
         sync();
     } );

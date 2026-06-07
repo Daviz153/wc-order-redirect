@@ -1,25 +1,51 @@
-const { test: setup, expect } = require('@playwright/test');
-const path = require('path');
-const fs = require('fs');
+const { test: setup } = require('@playwright/test');
+const { execSync }     = require('child_process');
+const path             = require('path');
+const fs               = require('fs');
 
-setup('WP 관리자 로그인 저장', async ({ page }) => {
-  const authDir = path.join(__dirname, '.auth');
-  const authFile = path.join(authDir, 'admin.json');
+const CONTAINER = 'wordpress-dev-wordpress-1';
 
-  // 이미 유효한 세션 파일이 있으면 건너뜀 (로컬 PHP 쿠키 생성 방식 지원)
-  if (fs.existsSync(authFile)) {
-    const state = JSON.parse(fs.readFileSync(authFile, 'utf8'));
-    if (state.cookies && state.cookies.length > 0) return;
-  }
+function dockerPhp(code) {
+    const full = `<?php
+error_reporting(E_ERROR);
+$_SERVER['HTTP_HOST']   = 'localhost';
+$_SERVER['REQUEST_URI'] = '/';
+require '/var/www/html/wp-load.php';
+${code}
+`;
+    return execSync(
+        `docker exec -i ${CONTAINER} php /dev/stdin`,
+        { input: full, encoding: 'utf8', timeout: 30_000 }
+    ).trim();
+}
 
-  const base = process.env.WP_BASE_URL || 'http://localhost:8080/';
+setup('WP 관리자 인증 쿠키 생성 (Docker PHP)', async () => {
+    const authDir  = path.join(__dirname, '.auth');
+    const authFile = path.join(authDir, 'admin.json');
+    fs.mkdirSync(authDir, { recursive: true });
 
-  await page.goto(base + 'wp-login.php', { waitUntil: 'domcontentloaded', timeout: 60_000 });
-  await page.fill('#user_login', process.env.WP_ADMIN_USER || 'admin');
-  await page.fill('#user_pass',  process.env.WP_ADMIN_PASS  || 'password');
-  await page.click('#wp-submit');
-  await page.waitForURL(/wp-admin/, { timeout: 30_000 });
+    const output = dockerPhp(`
+$user   = get_user_by('login', 'tearstar153');
+$expiry = time() + 86400;
+echo json_encode([
+    'authName'    => AUTH_COOKIE,
+    'authValue'   => wp_generate_auth_cookie($user->ID, $expiry, 'auth'),
+    'loggedName'  => LOGGED_IN_COOKIE,
+    'loggedValue' => wp_generate_auth_cookie($user->ID, $expiry, 'logged_in'),
+    'expiry'      => $expiry,
+]);
+`);
 
-  fs.mkdirSync(authDir, { recursive: true });
-  await page.context().storageState({ path: authFile });
+    const { authName, authValue, loggedName, loggedValue, expiry } = JSON.parse(output);
+
+    const storageState = {
+        cookies: [
+            { name: authName,   value: authValue,   domain: 'localhost', path: '/', expires: expiry, httpOnly: false, secure: false, sameSite: 'Lax' },
+            { name: loggedName, value: loggedValue, domain: 'localhost', path: '/', expires: expiry, httpOnly: false, secure: false, sameSite: 'Lax' },
+        ],
+        origins: [],
+    };
+
+    fs.writeFileSync(authFile, JSON.stringify(storageState, null, 2));
+    console.log('[auth-setup] cookies generated via Docker PHP');
 });
