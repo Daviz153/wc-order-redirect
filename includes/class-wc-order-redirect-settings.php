@@ -57,7 +57,7 @@ class WC_Order_Redirect_Settings extends WC_Settings_Page {
             [
                 'title'   => '기본 리다이렉트 URL',
                 'type'    => 'wcor_url',
-                'desc'    => '상품별 리다이렉트가 꺼져 있을 때 이동할 URL. 비워두면 리다이렉트하지 않습니다.',
+                'desc'    => '상품별 리다이렉트가 꺼져 있을 때 이동할 URL. http:// 또는 https://로 시작하는 모든 URL(외부 사이트 포함) 사용 가능. 비워두면 리다이렉트하지 않습니다.',
                 'id'      => 'wcor_default_url',
                 'default' => '',
             ],
@@ -83,8 +83,22 @@ class WC_Order_Redirect_Settings extends WC_Settings_Page {
     }
 
     public function save(): void {
-        update_option('wcor_enabled', !empty($_POST['wcor_enabled']) ? 'yes' : 'no');
-        update_option('wcor_default_url', esc_url_raw(wp_unslash((string) ($_POST['wcor_default_url'] ?? ''))));
+        $enabled = !empty($_POST['wcor_enabled']) ? 'yes' : 'no';
+        $raw_url = trim(wp_unslash((string) ($_POST['wcor_default_url'] ?? '')));
+
+        if ($raw_url !== '' && (
+            !filter_var($raw_url, FILTER_VALIDATE_URL) ||
+            (!str_starts_with($raw_url, 'http://') && !str_starts_with($raw_url, 'https://'))
+        )) {
+            WC_Admin_Settings::add_error(
+                __('기본 리다이렉트 URL이 유효하지 않습니다. http:// 또는 https://로 시작하는 전체 주소를 입력해주세요.', 'wc-order-redirect')
+            );
+            update_option('wcor_enabled', $enabled);
+            return;
+        }
+
+        update_option('wcor_enabled', $enabled);
+        update_option('wcor_default_url', esc_url_raw($raw_url));
     }
 
     // ── Custom field renderers ──────────────────────────────────────────

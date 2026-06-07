@@ -31,18 +31,23 @@ class WC_Order_Redirect {
             return;
         }
 
-        $products = implode(', ', array_map(fn($item) => $item->get_name(), $order->get_items()));
-        $customer = trim($order->get_billing_last_name() . ' ' . $order->get_billing_first_name());
-        $this->write_log([
-            'ts'       => time(),
-            'order'    => $order->get_id(),
-            'url'      => $url,
-            'src'      => $this->last_source,
-            'products' => $products,
-            'customer' => $customer,
-            'email'    => $order->get_billing_email(),
-            'phone'    => $order->get_billing_phone(),
-        ]);
+        // 최초 방문 시에만 로그 기록 (주문완료 페이지 재방문 로그 중복 방지)
+        if ($order->get_meta('_wcor_redirected') !== '1') {
+            $products = implode(', ', array_map(fn($item) => $item->get_name(), $order->get_items()));
+            $customer = trim($order->get_billing_last_name() . ' ' . $order->get_billing_first_name());
+            $this->write_log([
+                'ts'       => time(),
+                'order'    => $order->get_id(),
+                'url'      => $url,
+                'src'      => $this->last_source,
+                'products' => $products,
+                'customer' => $customer,
+                'email'    => $order->get_billing_email(),
+                'phone'    => $order->get_billing_phone(),
+            ]);
+            $order->update_meta_data('_wcor_redirected', '1');
+            $order->save_meta_data();
+        }
 
         wp_redirect(esc_url_raw($url), 302);
         exit();

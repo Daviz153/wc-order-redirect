@@ -93,6 +93,7 @@ function get_query_var(string $key): mixed {
 class WC_Order {
     private array $items;
     private int $id;
+    private array $meta = [];
 
     public function __construct(array $items = [], int $id = 0) {
         $this->items = $items;
@@ -107,6 +108,10 @@ class WC_Order {
     public function get_billing_last_name(): string  { return ''; }
     public function get_billing_email(): string      { return ''; }
     public function get_billing_phone(): string      { return ''; }
+
+    public function get_meta(string $key, bool $single = true): mixed { return $this->meta[$key] ?? ''; }
+    public function update_meta_data(string $key, mixed $value): void { $this->meta[$key] = $value; }
+    public function save_meta_data(): void {}
 }
 
 class WC_Order_Item_Product {

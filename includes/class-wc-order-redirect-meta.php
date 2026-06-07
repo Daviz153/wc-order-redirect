@@ -54,9 +54,16 @@ class WC_Order_Redirect_Meta {
         $thumb_left      = $enabled ? '22px' : '2px';
         $url_hidden      = $enabled ? '' : 'display:none;';
         $settings_url    = admin_url('admin.php?page=wc-settings&tab=wcor');
+        $is_variable     = function_exists('wc_get_product') && ($p = wc_get_product($product_id)) && $p->is_type('variable');
         ?>
         <div id="wcor_product_data" class="panel woocommerce_options_panel">
             <div class="options_group" style="padding:12px 16px">
+
+                <?php if ($is_variable) : ?>
+                    <p style="margin:0 0 14px; padding:10px 14px; background:#f0f6fc; border-left:4px solid #72aee6; border-radius:2px; font-size:12px; color:#50575e;">
+                        변형 상품(Variable Product)입니다. 여기서 설정한 리다이렉트 URL은 부모 상품 기준으로 저장되며 모든 변형(Variation)에 동일하게 적용됩니다.
+                    </p>
+                <?php endif; ?>
 
                 <?php if (!$globally_on) : ?>
                     <p style="margin:0 0 14px; padding:10px 14px; background:#fff8e1; border-left:4px solid #f0b429; border-radius:2px; font-size:12px; color:#50575e;">
