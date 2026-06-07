@@ -1,23 +1,10 @@
 const { test: setup } = require('@playwright/test');
-const { execSync }     = require('child_process');
+const { dockerPhp }   = require('./helpers');
 const path             = require('path');
 const fs               = require('fs');
 
-const CONTAINER = 'wordpress-dev-wordpress-1';
-
-function dockerPhp(code) {
-    const full = `<?php
-error_reporting(E_ERROR);
-$_SERVER['HTTP_HOST']   = 'localhost';
-$_SERVER['REQUEST_URI'] = '/';
-require '/var/www/html/wp-load.php';
-${code}
-`;
-    return execSync(
-        `docker exec -i ${CONTAINER} php /dev/stdin`,
-        { input: full, encoding: 'utf8', timeout: 30_000 }
-    ).trim();
-}
+// CI uses WP_ADMIN_USER=admin; local uses tearstar153
+const ADMIN_USER = process.env.WP_ADMIN_USER || 'tearstar153';
 
 setup('WP 관리자 인증 쿠키 생성 (Docker PHP)', async () => {
     const authDir  = path.join(__dirname, '.auth');
@@ -25,7 +12,7 @@ setup('WP 관리자 인증 쿠키 생성 (Docker PHP)', async () => {
     fs.mkdirSync(authDir, { recursive: true });
 
     const output = dockerPhp(`
-$user   = get_user_by('login', 'tearstar153');
+$user   = get_user_by('login', '${ADMIN_USER}');
 $expiry = time() + 86400;
 echo json_encode([
     'authName'    => AUTH_COOKIE,
