@@ -1,4 +1,7 @@
 const { execSync } = require('child_process');
+const fs   = require('fs');
+const os   = require('os');
+const path = require('path');
 
 // CI sets WP_PATH=/tmp/wordpress and runs PHP directly (no Docker)
 // Local uses Docker container
@@ -15,11 +18,21 @@ $_SERVER['REQUEST_URI'] = '/';
 require '${WP_LOAD}';
 ${code}
 `;
-    const cmd = WP_PATH
-        ? 'php -'
-        : `docker exec -i ${CONTAINER} php -`;
-
-    return execSync(cmd, { input: full, encoding: 'utf8', timeout: 30_000 }).trim();
+    if (WP_PATH) {
+        // CI: execSync stdin piping unreliable — write to temp file instead
+        const tmp = path.join(os.tmpdir(), `wcor_${Date.now()}.php`);
+        fs.writeFileSync(tmp, full);
+        try {
+            return execSync(`php ${tmp}`, { encoding: 'utf8', timeout: 30_000 }).trim();
+        } finally {
+            fs.unlinkSync(tmp);
+        }
+    }
+    // Local: pipe via Docker stdin
+    return execSync(
+        `docker exec -i ${CONTAINER} php /dev/stdin`,
+        { input: full, encoding: 'utf8', timeout: 30_000 }
+    ).trim();
 }
 
 module.exports = { dockerPhp };
