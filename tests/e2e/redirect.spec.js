@@ -57,3 +57,27 @@ echo $order->get_id() . ':' . $order->get_order_key();
     await page.goto(frontendUrl(`checkout/order-received/${id}/?key=${key}`));
     await expect(page).toHaveURL(testData.redirectTarget);
 });
+
+test('주문완료 페이지 재방문 시 로그 중복 방지', async ({ page }) => {
+    const { id, key } = createOrder(testData.productWithUrl);
+
+    // 로그 초기화 후 테스트 시작
+    dockerPhp(`delete_option('wcor_redirect_log');`);
+
+    const orderReceivedUrl = frontendUrl(`checkout/order-received/${id}/?key=${key}`);
+
+    // 첫 방문 — 리다이렉트 + 로그 1건 기록
+    await page.goto(orderReceivedUrl);
+    await expect(page).toHaveURL(testData.redirectTarget);
+
+    // 두 번째 방문 — 리다이렉트는 동일하나 로그 추가 없음
+    await page.goto(orderReceivedUrl);
+    await expect(page).toHaveURL(testData.redirectTarget);
+
+    // 해당 주문의 로그 건수가 1건임을 확인
+    const logCount = dockerPhp(`
+$log = (array) get_option('wcor_redirect_log', []);
+echo count(array_filter($log, fn($e) => (int)($e['order'] ?? 0) === ${id}));
+`);
+    expect(parseInt(logCount, 10)).toBe(1);
+});

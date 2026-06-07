@@ -60,6 +60,11 @@ function wp_http_validate_url(string $url): string|false {
     return filter_var($url, FILTER_VALIDATE_URL) ? $url : false;
 }
 
+// --- 날짜 ---
+function wp_date(string $format, ?int $timestamp = null): string {
+    return date($format, $timestamp ?? time());
+}
+
 // --- 리다이렉트 ---
 $GLOBALS['_wp_redirect_called'] = false;
 $GLOBALS['_wp_redirect_url']    = '';
