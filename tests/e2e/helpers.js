@@ -16,8 +16,8 @@ require '${WP_LOAD}';
 ${code}
 `;
     const cmd = WP_PATH
-        ? 'php /dev/stdin'
-        : `docker exec -i ${CONTAINER} php /dev/stdin`;
+        ? 'php -'
+        : `docker exec -i ${CONTAINER} php -`;
 
     return execSync(cmd, { input: full, encoding: 'utf8', timeout: 30_000 }).trim();
 }
