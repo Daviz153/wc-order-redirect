@@ -6,3 +6,6 @@ test-results/
 PROJECT_ARCHIVE.md
 CLAUDE.md
 *.zip
+.playwright-mcp/
+wcor-settings-fixed.png
+wc-order-redirect-plan.md
