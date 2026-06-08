@@ -5,6 +5,8 @@ module.exports = defineConfig({
   globalSetup: 'tests/e2e/global-setup.js',
   timeout: 30_000,
   retries: process.env.CI ? 1 : 0,
+  // 테스트가 WordPress 전역 옵션(wcor_default_url 등)을 공유하므로 직렬 실행
+  workers: 1,
   use: {
     // trailing slash 필수 — spec 파일에서 leading slash 없이 경로 작성
     baseURL: process.env.WP_BASE_URL || 'http://localhost:8080/',

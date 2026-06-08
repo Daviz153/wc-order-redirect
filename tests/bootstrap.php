@@ -11,8 +11,9 @@ function get_current_screen(): ?object { return null; }
 function plugin_dir_url(string $file): string { return 'http://example.com/plugins/wc-order-redirect/'; }
 function wp_enqueue_style(string $handle, string $src = '', array $deps = [], $ver = false): void {}
 
-// --- post_meta 인메모리 저장소 ---
+// --- post_meta / options 인메모리 저장소 ---
 $GLOBALS['_post_meta'] = [];
+$GLOBALS['_options']   = [];
 
 function get_post_meta(int $post_id, string $key, bool $single = false) {
     $value = $GLOBALS['_post_meta'][$post_id][$key] ?? '';
@@ -30,6 +31,20 @@ function delete_post_meta_by_key(string $key): void {
     }
 }
 
+function get_option(string $key, $default = false) {
+    return $GLOBALS['_options'][$key] ?? $default;
+}
+
+function update_option(string $key, $value, $autoload = null): bool {
+    $GLOBALS['_options'][$key] = $value;
+    return true;
+}
+
+function delete_option(string $key): bool {
+    unset($GLOBALS['_options'][$key]);
+    return true;
+}
+
 // --- URL 처리 ---
 function esc_url_raw(string $url): string {
     // http/https 외 scheme 차단
@@ -43,6 +58,11 @@ function esc_attr(string $text): string {
 
 function wp_http_validate_url(string $url): string|false {
     return filter_var($url, FILTER_VALIDATE_URL) ? $url : false;
+}
+
+// --- 날짜 ---
+function wp_date(string $format, ?int $timestamp = null): string {
+    return date($format, $timestamp ?? time());
 }
 
 // --- 리다이렉트 ---
@@ -77,28 +97,38 @@ function get_query_var(string $key): mixed {
 
 class WC_Order {
     private array $items;
+    private int $id;
+    private array $meta = [];
 
-    public function __construct(array $items = []) {
+    public function __construct(array $items = [], int $id = 0) {
         $this->items = $items;
+        $this->id    = $id;
     }
 
-    public function get_items(): array {
-        return $this->items;
-    }
+    public function get_items(): array      { return $this->items; }
+    public function get_id(): int           { return $this->id; }
+    public function key_is_valid(string $key): bool { return true; }
 
-    public function key_is_valid(string $key): bool {
-        return true;
-    }
+    public function get_billing_first_name(): string { return ''; }
+    public function get_billing_last_name(): string  { return ''; }
+    public function get_billing_email(): string      { return ''; }
+    public function get_billing_phone(): string      { return ''; }
+
+    public function get_meta(string $key, bool $single = true): mixed { return $this->meta[$key] ?? ''; }
+    public function update_meta_data(string $key, mixed $value): void { $this->meta[$key] = $value; }
+    public function save_meta_data(): void {}
 }
 
 class WC_Order_Item_Product {
     public function __construct(
         private int $product_id,
-        private float $total
+        private float $total,
+        private string $name = ''
     ) {}
 
     public function get_product_id(): int   { return $this->product_id; }
     public function get_total(): float      { return $this->total; }
+    public function get_name(): string      { return $this->name; }
 }
 
 class WooCommerce {}

@@ -22,6 +22,7 @@ class WcOrderRedirectErrorTest extends TestCase {
 
     protected function setUp(): void {
         $GLOBALS['_post_meta']              = [];
+        $GLOBALS['_options']               = [];
         $GLOBALS['_wp_redirect_called']     = false;
         $GLOBALS['_wp_redirect_url']        = '';
         $GLOBALS['_is_order_received_page'] = true;

@@ -1,11 +1,20 @@
 <?php
 /**
  * Plugin Name: WC Order Redirect
+ * Plugin URI:  https://github.com/Daviz153-wpPlugins/wc-order-redirect
  * Description: 결제 완료 후 상품별로 설정한 URL로 즉시 이동합니다.
  * Version:     1.0.2
- * Requires Plugins: woocommerce
+ * Author:      CRMBiz
+ * Author URI:  https://github.com/Daviz153-wpPlugins
+ * License:     GPL-2.0-or-later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain: wc-order-redirect
  * Requires at least: 6.0
+ * Tested up to: 6.8
  * Requires PHP: 8.0
+ * Requires Plugins: woocommerce
+ * WC requires at least: 8.0
+ * WC tested up to: 9.8
  */
 
 if (!defined('ABSPATH')) {
@@ -48,7 +57,18 @@ add_action('plugins_loaded', function () {
 
     require_once __DIR__ . '/includes/class-wc-order-redirect-meta.php';
     require_once __DIR__ . '/includes/class-wc-order-redirect.php';
+    require_once __DIR__ . '/includes/class-wc-order-redirect-privacy.php';
 
     new WC_Order_Redirect_Meta();
     new WC_Order_Redirect();
+
+    add_filter('woocommerce_get_settings_pages', function (array $pages): array {
+        require_once __DIR__ . '/includes/class-wc-order-redirect-settings.php';
+        $pages[] = new WC_Order_Redirect_Settings();
+        return $pages;
+    });
+
+    // GDPR: 개인정보 내보내기/삭제 API 등록
+    add_filter('wp_privacy_personal_data_exporters', 'wcor_privacy_register_exporter');
+    add_filter('wp_privacy_personal_data_erasers',   'wcor_privacy_register_eraser');
 });

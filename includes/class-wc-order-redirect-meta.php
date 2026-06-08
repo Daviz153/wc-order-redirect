@@ -25,13 +25,13 @@ class WC_Order_Redirect_Meta {
             'wcor-meta-box',
             plugin_dir_url(dirname(__FILE__)) . 'assets/css/meta-box.css',
             [],
-            '1.0.1'
+            '1.0.2'
         );
         wp_enqueue_script(
             'wcor-meta-box',
             plugin_dir_url(dirname(__FILE__)) . 'assets/js/meta-box.js',
             [],
-            '1.0.1',
+            '1.0.2',
             true
         );
     }
@@ -46,18 +46,36 @@ class WC_Order_Redirect_Meta {
     }
 
     public function render_product_panel(): void {
-        $product_id  = get_the_ID();
-        $enabled     = get_post_meta($product_id, '_wc_order_redirect_enabled', true) === 'yes';
-        $url         = esc_attr(get_post_meta($product_id, '_wc_order_redirect_url', true));
-        $track_color = $enabled ? '#2271b1' : '#ccc';
-        $thumb_left  = $enabled ? '22px' : '2px';
-        $url_hidden  = $enabled ? '' : 'display:none;';
+        $product_id      = get_the_ID();
+        $globally_on     = get_option('wcor_enabled', 'yes') === 'yes';
+        $enabled         = get_post_meta($product_id, '_wc_order_redirect_enabled', true) === 'yes';
+        $url             = esc_attr(get_post_meta($product_id, '_wc_order_redirect_url', true));
+        $track_color     = $enabled ? '#2271b1' : '#ccc';
+        $thumb_left      = $enabled ? '22px' : '2px';
+        $url_hidden      = $enabled ? '' : 'display:none;';
+        $settings_url    = admin_url('admin.php?page=wc-settings&tab=wcor');
+        $is_variable     = function_exists('wc_get_product') && ($p = wc_get_product($product_id)) && $p->is_type('variable');
         ?>
         <div id="wcor_product_data" class="panel woocommerce_options_panel">
             <div class="options_group" style="padding:12px 16px">
 
+                <?php if ($is_variable) : ?>
+                    <p style="margin:0 0 14px; padding:10px 14px; background:#f0f6fc; border-left:4px solid #72aee6; border-radius:2px; font-size:12px; color:#50575e;">
+                        변형 상품(Variable Product)입니다. 여기서 설정한 리다이렉트 URL은 부모 상품 기준으로 저장되며 모든 변형(Variation)에 동일하게 적용됩니다.
+                    </p>
+                <?php endif; ?>
+
+                <?php if (!$globally_on) : ?>
+                    <p style="margin:0 0 14px; padding:10px 14px; background:#fff8e1; border-left:4px solid #f0b429; border-radius:2px; font-size:12px; color:#50575e;">
+                        전체 리다이렉트 기능이 비활성화되어 있습니다.
+                        &nbsp;<a href="<?php echo esc_url($settings_url); ?>">설정에서 활성화하기 →</a>
+                    </p>
+                <?php endif; ?>
+
                 <p style="margin:0 0 12px; padding:0">
-                    <span id="wcor-toggle-wrap" style="display:inline-flex; align-items:center; gap:10px; cursor:pointer">
+                    <span id="wcor-toggle-wrap"
+                          data-wcor-globally-disabled="<?php echo $globally_on ? '0' : '1'; ?>"
+                          style="display:inline-flex; align-items:center; gap:10px; cursor:<?php echo $globally_on ? 'pointer' : 'not-allowed'; ?>; <?php echo $globally_on ? '' : 'opacity:0.45;'; ?>">
                         <input type="checkbox" id="wc_order_redirect_enabled"
                                name="wc_order_redirect_enabled" value="yes"
                                style="display:none" <?php checked(true, $enabled); ?>>
