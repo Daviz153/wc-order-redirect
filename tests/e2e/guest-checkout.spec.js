@@ -19,23 +19,25 @@ test.beforeEach(async ({ page }) => {
 
 test.setTimeout(60_000);
 
-test('게스트 결제 완료 후 리다이렉트 URL로 즉시 이동', async ({ page }) => {
-  // 1. 장바구니에 담기 (비로그인)
-  await page.goto(`/?add-to-cart=${testData.productWithUrl}`, {
-    waitUntil: 'domcontentloaded',
-  });
+// 필드가 DOM에 존재하고 보일 때만 채움 (로컬/CI 체크아웃 폼이 다를 수 있음)
+async function fillIfVisible(page, selector, value) {
+  const el = page.locator(selector);
+  if (await el.count() > 0 && await el.isVisible({ timeout: 500 }).catch(() => false)) {
+    await el.fill(value);
+  }
+}
 
-  // 2. 체크아웃 이동
-  await page.goto('checkout/');
-  await page.waitForLoadState('networkidle');
-  await expect(page).toHaveURL(/checkout/);
+async function fillGuestBilling(page) {
+  await fillIfVisible(page, '#billing_first_name', '홍길동');
+  await fillIfVisible(page, '#billing_last_name',  '테스트');
+  await fillIfVisible(page, '#billing_address_1',  '강남구 테헤란로 123');
+  await fillIfVisible(page, '#billing_city',       '서울');
+  await fillIfVisible(page, '#billing_postcode',   '06234');
+  await fillIfVisible(page, '#billing_phone',      '01012345678');
+  await fillIfVisible(page, '#billing_email',      'guest@example.com');
+}
 
-  // 3. 청구 정보 입력 (이 쇼핑몰은 이름·전화·이메일만 필수)
-  await page.fill('#billing_first_name', '홍길동');
-  await page.fill('#billing_phone', '01012345678');
-  await page.fill('#billing_email', 'guest@example.com');
-
-  // 4. COD 선택 후 주문 제출
+async function submitCOD(page) {
   await page.click('label[for="payment_method_cod"]');
   await page.waitForLoadState('networkidle');
   const terms = page.locator('#terms');
@@ -43,31 +45,28 @@ test('게스트 결제 완료 후 리다이렉트 URL로 즉시 이동', async (
     await terms.check({ force: true });
   }
   await page.click('#place_order');
+}
 
-  // 5. 감사 페이지 없이 설정한 URL로 즉시 이동
-  await expect(page).toHaveURL(testData.redirectTarget, { timeout: 15_000 });
-});
-
-test('게스트 결제 — URL 없는 상품은 기존 감사 페이지 유지', async ({ page }) => {
-  await page.goto(`/?add-to-cart=${testData.productWithoutUrl}`, {
-    waitUntil: 'domcontentloaded',
-  });
-
+test('게스트 결제 완료 후 리다이렉트 URL로 즉시 이동', async ({ page }) => {
+  await page.goto(`/?add-to-cart=${testData.productWithUrl}`, { waitUntil: 'domcontentloaded' });
   await page.goto('checkout/');
   await page.waitForLoadState('networkidle');
   await expect(page).toHaveURL(/checkout/);
 
-  await page.fill('#billing_first_name', '홍길동');
-  await page.fill('#billing_phone', '01012345678');
-  await page.fill('#billing_email', 'guest@example.com');
+  await fillGuestBilling(page);
+  await submitCOD(page);
 
-  await page.click('label[for="payment_method_cod"]');
+  await expect(page).toHaveURL(testData.redirectTarget, { timeout: 15_000 });
+});
+
+test('게스트 결제 — URL 없는 상품은 기존 감사 페이지 유지', async ({ page }) => {
+  await page.goto(`/?add-to-cart=${testData.productWithoutUrl}`, { waitUntil: 'domcontentloaded' });
+  await page.goto('checkout/');
   await page.waitForLoadState('networkidle');
-  const terms2 = page.locator('#terms');
-  if (await terms2.isVisible() && !(await terms2.isChecked())) {
-    await terms2.check({ force: true });
-  }
-  await page.click('#place_order');
+  await expect(page).toHaveURL(/checkout/);
+
+  await fillGuestBilling(page);
+  await submitCOD(page);
 
   await expect(page).toHaveURL(/order-received/, { timeout: 15_000 });
 });
