@@ -4,6 +4,11 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to build (e.g. v1.1.1)'
+        required: true
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -16,6 +21,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
 
       - uses: shivammathur/setup-php@v2
         with:
@@ -29,14 +36,12 @@ jobs:
           mkdir -p dist/wc-order-redirect/includes
           cp wc-order-redirect.php uninstall.php dist/wc-order-redirect/
           cp includes/*.php dist/wc-order-redirect/includes/
+          cp -r assets dist/wc-order-redirect/
           cp -r vendor dist/wc-order-redirect/
           cd dist && zip -r ../wc-order-redirect.zip wc-order-redirect/
 
-      - name: Create GitHub Release
-        run: |
-          gh release create ${{ github.ref_name }} \
-            wc-order-redirect.zip \
-            --title "WC Order Redirect ${{ github.ref_name }}" \
-            --generate-notes
+      - name: Upload release asset
         env:
           GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+        run: gh release upload "$RELEASE_TAG" wc-order-redirect.zip --clobber
