@@ -3,7 +3,7 @@
  * Plugin Name: WC Order Redirect
  * Plugin URI:  https://github.com/Daviz153-wpPlugins/wc-order-redirect
  * Description: 결제 완료 후 상품별로 설정한 URL로 즉시 이동합니다.
- * Version:     1.1.0
+ * Version:     1.1.1
  * Author:      CRMBiz
  * Author URI:  https://github.com/Daviz153-wpPlugins
  * License:     GPL-2.0-or-later
