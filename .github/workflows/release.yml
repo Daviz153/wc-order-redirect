@@ -52,6 +52,6 @@ jobs:
             gh release upload "$RELEASE_TAG" wc-order-redirect.zip --clobber
           else
             gh release create "$RELEASE_TAG" wc-order-redirect.zip \
-              --title "$RELEASE_TAG" \
+              --title "WC Order Redirect $RELEASE_TAG" \
               --notes "$NOTES"
           fi
