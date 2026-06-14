@@ -3,6 +3,7 @@
     "@playwright/test": "^1.45"
   },
   "scripts": {
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:e2e:remote": "env $(grep -v '^#' .env.test-crmbiz | xargs) playwright test"
   }
 }
