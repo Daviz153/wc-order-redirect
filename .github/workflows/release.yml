@@ -40,8 +40,18 @@ jobs:
           cp -r vendor dist/wc-order-redirect/
           cd dist && zip -r ../wc-order-redirect.zip wc-order-redirect/
 
-      - name: Upload release asset
+      - name: Create or update GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
-        run: gh release upload "$RELEASE_TAG" wc-order-redirect.zip --clobber
+        run: |
+          VERSION="${RELEASE_TAG#v}"
+          NOTES=$(awk "/^## \[${VERSION}\]/{flag=1; next} /^## \[/{flag=0} flag" CHANGELOG.md \
+                  | sed '/^---$/d' | sed '/^[[:space:]]*$/d')
+          if gh release view "$RELEASE_TAG" &>/dev/null; then
+            gh release upload "$RELEASE_TAG" wc-order-redirect.zip --clobber
+          else
+            gh release create "$RELEASE_TAG" wc-order-redirect.zip \
+              --title "$RELEASE_TAG" \
+              --notes "$NOTES"
+          fi
