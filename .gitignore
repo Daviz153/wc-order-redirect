@@ -9,3 +9,4 @@ CLAUDE.md
 .playwright-mcp/
 wcor-settings-fixed.png
 wc-order-redirect-plan.md
+.phpunit.result.cache
