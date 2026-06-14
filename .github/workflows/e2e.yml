@@ -114,6 +114,8 @@ jobs:
             /tmp/wordpress/wp-content/plugins/wc-order-redirect/
           cp includes/*.php \
             /tmp/wordpress/wp-content/plugins/wc-order-redirect/includes/
+          cp -r assets/ \
+            /tmp/wordpress/wp-content/plugins/wc-order-redirect/assets/
           wp plugin activate wc-order-redirect --path=/tmp/wordpress
 
       - name: Start WordPress server
