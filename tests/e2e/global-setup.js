@@ -47,5 +47,16 @@ echo $id;
         JSON.stringify({ productWithUrl, productWithoutUrl, redirectTarget: REDIRECT_TARGET, frontendBaseUrl, siteUrl })
     );
 
+    // checkout-flow 스펙이 COD(착불결제)를 사용하므로 활성화 보장
+    dockerPhp(`
+update_option('woocommerce_cod_settings', [
+    'enabled'            => 'yes',
+    'enable_for_virtual' => 'yes',
+    'title'              => 'Cash on Delivery',
+    'description'        => '',
+    'instructions'       => '',
+]);
+`);
+
     console.log(`[global-setup] productWithUrl=${productWithUrl}, productWithoutUrl=${productWithoutUrl}, frontendBaseUrl=${frontendBaseUrl}`);
 };

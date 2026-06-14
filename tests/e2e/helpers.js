@@ -30,7 +30,7 @@ ${code}
         const CM_PATH = `/tmp/wcor-cm-${SSH_HOST.replace(/[^a-z0-9]/gi, '_')}`;
         return execSync(
             `ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no -o BatchMode=yes`
-            + ` -o ControlMaster=auto -o ControlPath=${CM_PATH} -o ControlPersist=120s`
+            + ` -o ControlMaster=auto -o ControlPath=${CM_PATH} -o ControlPersist=300s`
             + ` ${SSH_HOST} php /dev/stdin`,
             { input: full, encoding: 'utf8', timeout: 30_000 }
         ).trim();
