@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.1.2] - 2026-06-14
+
+### 테스트
+- E2E 테스트를 test.crmbiz.kr 원격 서버에 연결 (SSH ControlMaster 방식)
+- global-setup에서 COD 결제 수단 자동 활성화 — 수동 서버 설정 불필요
+- SSH ControlPersist 300s로 연장, retries: 1 상시 적용으로 간헐적 네트워크 오류 흡수
+
+---
+
+## [1.1.1] - 2026-06-09
+
+### 버그픽스
+- 플러그인 삭제(uninstall) 시 HPOS 주문 메타(`_wcor_redirected`) 누락 삭제 수정
+
+---
+
+## [1.1.0] - 2026-06-08
+
+### 추가
+- WooCommerce 설정 탭(wcor) — 전역 토글, 디폴트 URL, 리다이렉트 로그 뷰어
+- 디폴트 URL 폴백 (`wcor_default_url`) — 상품 URL 없을 때 글로벌 URL로 이동
+- 중복 로그 방지 — `_wcor_redirected` 주문 메타로 재방문 시 로그 스킵
+- GDPR 지원 — 개인정보 내보내기/삭제 등록 (`wp_privacy_personal_data_exporters/erasers`)
+- URL 검증 피드백 — 잘못된 URL 저장 시 WooCommerce 관리자 오류 메시지 표시
+- Variable Product 안내 문구 추가
+
+---
+
 ## [1.0.2] - 2026-06-06
 
 ### 개선
