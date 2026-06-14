@@ -169,6 +169,47 @@ class WcOrderRedirectTest extends TestCase {
         $this->assertSame('', $url);
     }
 
+    public function test_skips_invalid_default_url(): void {
+        $item  = new WC_Order_Item_Product(10, 50.0);
+        $order = new WC_Order([$item]);
+
+        $GLOBALS['_post_meta'][10]['_wc_order_redirect_enabled'] = 'no';
+        $GLOBALS['_options']['wcor_default_url']                 = 'ftp://example.com';
+
+        $url = (new WC_Order_Redirect())->get_redirect_url($order);
+
+        $this->assertSame('', $url);
+    }
+
+    public function test_invalid_product_url_and_invalid_default_url_returns_empty(): void {
+        $item  = new WC_Order_Item_Product(10, 50.0);
+        $order = new WC_Order([$item]);
+
+        $GLOBALS['_post_meta'][10]['_wc_order_redirect_enabled'] = 'yes';
+        $GLOBALS['_post_meta'][10]['_wc_order_redirect_url']     = 'not-a-valid-url';
+        $GLOBALS['_options']['wcor_default_url']                 = 'ftp://example.com';
+
+        $url = (new WC_Order_Redirect())->get_redirect_url($order);
+
+        $this->assertSame('', $url);
+    }
+
+    public function test_same_price_products_uses_first_valid_url(): void {
+        // 동일 가격이면 uasort 순서가 구현 의존적 — 어느 쪽이든 유효한 URL을 반환해야 함
+        $itemA = new WC_Order_Item_Product(10, 50.0);
+        $itemB = new WC_Order_Item_Product(20, 50.0);
+        $order = new WC_Order([$itemA, $itemB]);
+
+        $GLOBALS['_post_meta'][10]['_wc_order_redirect_enabled'] = 'yes';
+        $GLOBALS['_post_meta'][10]['_wc_order_redirect_url']     = 'https://example.com/a';
+        $GLOBALS['_post_meta'][20]['_wc_order_redirect_enabled'] = 'yes';
+        $GLOBALS['_post_meta'][20]['_wc_order_redirect_url']     = 'https://example.com/b';
+
+        $url = (new WC_Order_Redirect())->get_redirect_url($order);
+
+        $this->assertContains($url, ['https://example.com/a', 'https://example.com/b']);
+    }
+
     // --- [Feature A] 메타박스 저장 ---
 
     public function test_enabled_flag_saved(): void {
